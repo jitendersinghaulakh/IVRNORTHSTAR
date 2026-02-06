@@ -1,0 +1,129 @@
+.ivr-tester-container {
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(236, 72, 153, 0.3);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+}
+
+.tester-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.tester-header .icon-wrapper {
+    width: 3rem;
+    height: 3rem;
+    background: var(--secondary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 20px rgba(236, 72, 153, 0.4);
+}
+
+.tester-header h3 {
+    margin-bottom: 0.25rem;
+    font-size: 1.25rem;
+}
+
+.tester-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.highlight {
+    color: var(--secondary);
+    font-weight: 600;
+}
+
+.flow-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.flow-step {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.input-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.trigger-button {
+    height: 3.5rem;
+    padding: 0 2rem;
+    border-radius: 0.75rem;
+    border: none;
+    background: var(--secondary);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.trigger-button:hover:not(:disabled) {
+    background: #db2777;
+    /* Pink-600 */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+}
+
+.trigger-button:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.result-message {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--success);
+    text-align: center;
+}
+
+.result-message.error {
+    color: var(--error);
+}
+.softphone-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    transition: all 0.2s;
+}
+
+.softphone-toggle:hover {
+    opacity: 0.8;
+}
+
+.softphone-toggle input[type="checkbox"] {
+    accent-color: var(--secondary);
+    width: 1rem;
+    height: 1rem;
+}
+
