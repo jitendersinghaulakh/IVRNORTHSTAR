@@ -66,7 +66,7 @@ export const CallControl: React.FC = () => {
 
             } catch (innerErr) {
                 setStatus('success');
-                setMessage('Simulation Mode: Call Initiated');
+                setMessage('Simulation Only: Backend missing on Bolt. Run locally to trigger real calls.');
             }
         }
 
