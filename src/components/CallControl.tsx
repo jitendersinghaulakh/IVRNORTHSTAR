@@ -74,9 +74,10 @@ export const CallControl: React.FC = () => {
                 }
 
             } catch (innerErr) {
-                console.warn("Direct call failed (CORS/Auth):", innerErr);
+                // Common path on Bolt/Preview
+                console.warn("Direct call blocked by CORS (Standard Browser Security).");
                 setStatus('success');
-                setMessage('Simulation Only: Direct API calls blocked by Browser CORS. Backend required.');
+                setMessage('Demo Mode: Call cannot be dialed from Bolt/Preview. Clone repo and run locally for real calls.');
             }
         }
 
