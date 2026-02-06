@@ -6,12 +6,15 @@ import './PhoneKeypad.css';
 interface PhoneKeypadProps {
     onCall: () => void;
     status: 'idle' | 'calling' | 'connected' | 'ended';
+    scenario?: string; // Add scenario prop
 }
 
-export const PhoneKeypad: React.FC<PhoneKeypadProps> = ({ onCall, status }) => {
+export const PhoneKeypad: React.FC<PhoneKeypadProps> = ({ onCall, status, scenario = 'kba' }) => {
     const [digits, setDigits] = useState('');
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
+    const voiceRef = React.useRef<HTMLAudioElement | null>(null);
 
+    // Effect for Ringback Tone
     React.useEffect(() => {
         // Simple ringing tone simulation
         if (status === 'calling') {
@@ -19,6 +22,8 @@ export const PhoneKeypad: React.FC<PhoneKeypadProps> = ({ onCall, status }) => {
             if (!audioRef.current) {
                 audioRef.current = new Audio('https://upload.wikimedia.org/wikipedia/commons/e/e5/US_ringback_tone.ogg');
                 audioRef.current.loop = true;
+                // Reduce volume so it's not jarring
+                audioRef.current.volume = 0.5;
             }
             audioRef.current.play().catch(e => console.warn("Audio play prevented", e));
         } else {
@@ -35,6 +40,77 @@ export const PhoneKeypad: React.FC<PhoneKeypadProps> = ({ onCall, status }) => {
             }
         }
     }, [status]);
+
+    // Effect for Voice Prompts on Connect
+    React.useEffect(() => {
+        if (status === 'connected') {
+            // Stop any ringing
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
+
+            // Map scenario to Text-to-Speech Audio URL (using free TTS generic endpoints for demo or standard files)
+            // For robustness in this demo without a real backend TTS, we will specific MP3s if available, or just generic "Welcome" ones.
+            // Since we don't have custom MP3s hosted, I will use a reliable generic Voice Greeting for the demo purpose.
+
+            // NOTE: In a real app, this would stream from Twilio. Here we simulate the "Hearing" part for the Bolt demo.
+
+            let audioUrl = '';
+
+            // Simple switch to pick different 'simulated' prompts
+            // Using generic placeholders or public domain speech samples for the demo effect
+            switch (scenario) {
+                case 'kba':
+                    // "Welcome... please enter ID"
+                    audioUrl = 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav'; // Placeholder: Using a known short clip or synthesize one? 
+                    // Actually, let's use the browser's Native Speech Synthesis API! It's better for dynamic demo without external files.
+                    speakText("Welcome to NorthStar. Please enter your 4 digit Account I.D.");
+                    break;
+                case 'pin':
+                    speakText("Welcome to Secure Banking. Please enter your 4 digit PIN.");
+                    break;
+                case 'otp':
+                    speakText("We have sent a one-time passcode to your authentic device. Please enter the 6 digit code.");
+                    break;
+                case 'voice':
+                    speakText("Voice Security Check. Please say: My voice is my password.");
+                    break;
+                case 'mfa':
+                    speakText("Multi-Factor Authentication Required. Step one: Enter your PIN.");
+                    break;
+                case 'trustid_short':
+                    speakText("Welcome back John. Trust I.D. verified. Enter last 4 digits of account.");
+                    break;
+                case 'trustid_selfservice':
+                    speakText("Identity Verified. Premium Menu Unlocked. Press 1 for transfers.");
+                    break;
+                case 'trustid_routing':
+                    speakText("Security Warning. We are routing you to a fraud specialist. Please hold.");
+                    break;
+                default:
+                    speakText("Welcome to the Interactive Demo.");
+            }
+        } else {
+            // Stop speaking if call ends
+            window.speechSynthesis.cancel();
+        }
+    }, [status, scenario]);
+
+    const speakText = (text: string) => {
+        // Use Web Speech API for instant feedback without backend assets
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9; // Slightly slower for phone clarity
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        // Try to pick a female voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const femaleVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha'));
+        if (femaleVoice) utterance.voice = femaleVoice;
+
+        window.speechSynthesis.speak(utterance);
+    };
 
     const handlePress = (digit: string) => {
         if (status === 'idle') {

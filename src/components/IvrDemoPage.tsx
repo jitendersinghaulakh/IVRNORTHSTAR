@@ -107,7 +107,7 @@ export const IvrDemoPage: React.FC = () => {
                     </div>
 
                     <div className="phone-wrapper">
-                        <PhoneKeypad onCall={handlePhoneCall} status={phoneStatus} />
+                        <PhoneKeypad onCall={handlePhoneCall} status={phoneStatus} scenario={selectedFlow} />
                     </div>
                 </motion.div>
             </div>
