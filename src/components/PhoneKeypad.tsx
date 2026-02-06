@@ -10,6 +10,31 @@ interface PhoneKeypadProps {
 
 export const PhoneKeypad: React.FC<PhoneKeypadProps> = ({ onCall, status }) => {
     const [digits, setDigits] = useState('');
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+    React.useEffect(() => {
+        // Simple ringing tone simulation
+        if (status === 'calling') {
+            // Create audio object if not exists. Using a public domain ringtone or synthetic beep
+            if (!audioRef.current) {
+                audioRef.current = new Audio('https://upload.wikimedia.org/wikipedia/commons/e/e5/US_ringback_tone.ogg');
+                audioRef.current.loop = true;
+            }
+            audioRef.current.play().catch(e => console.warn("Audio play prevented", e));
+        } else {
+            // Stop ringing on connect or other states
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
+        }
+
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+        }
+    }, [status]);
 
     const handlePress = (digit: string) => {
         if (status === 'idle') {
