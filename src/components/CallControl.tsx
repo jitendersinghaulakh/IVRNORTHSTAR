@@ -12,79 +12,44 @@ export const CallControl: React.FC = () => {
         setStatus('calling');
         setMessage('');
 
-        // Use the backend endpoint via Vite proxy
-        const url = `/api/make-call`;
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseKey) {
+            setStatus('error');
+            setMessage('Missing Supabase configuration');
+            setTimeout(() => setStatus('idle'), 5000);
+            return;
+        }
+
+        const url = `${supabaseUrl}/functions/v1/make-call`;
 
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseKey}`
                 },
                 body: JSON.stringify({ to: phoneNumber })
             });
 
             if (!response.ok) {
-                throw new Error('Backend unavailable');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Call failed');
             }
 
             const data = await response.json();
             setStatus('success');
-            setMessage(`Call queued! SID: ${data.sid}`);
+            setMessage(`Call initiated! SID: ${data.sid}`);
 
         } catch (error) {
-            console.warn("Backend unavailable, attempting client-side fallback...", error);
-
-            // FALLBACK: Client-side Direct Call (Not recommended for prod, but life-saver for Demos/Bolt)
-            try {
-                const accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
-                const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
-                if (!accountSid || !authToken) throw new Error("Missing Env Vars");
-
-                // Basic Basic Auth Encoding
-                const auth = btoa(`${accountSid}:${authToken}`);
-
-                // Hardcoded Flow SID (Master Flow)
-                const flowSid = "FWfbc7b7f41a22199aab7261079d59c701";
-                const fromNumber = import.meta.env.VITE_TWILIO_FROM_NUMBER || '+18885799021';
-
-                const params = new URLSearchParams();
-                params.append('To', phoneNumber);
-                params.append('From', fromNumber);
-                params.append('Url', `http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient`); // Simple TwiML to verify call
-
-                // DIRECT CLIENT-SIDE REQUEST (Attempt)
-                // Note: This relies on Twilio Account settings allowing CORS or browser ignoring it (unlikely in strict mode).
-                // But it's the requested 'Fix'.
-                const directResp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Calls.json`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Basic ' + auth,
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: params
-                });
-
-                if (directResp.ok) {
-                    const data = await directResp.json();
-                    setStatus('success');
-                    setMessage(`Real Call Initiated! SID: ${data.sid}`);
-                } else {
-                    throw new Error('Direct API Failed');
-                }
-
-            } catch (innerErr) {
-                // Common path on Bolt/Preview
-                console.warn("Direct call blocked by CORS (Standard Browser Security).");
-                setStatus('success');
-                setMessage('Demo Mode: Call cannot be dialed from Bolt/Preview. Clone repo and run locally for real calls.');
-            }
+            console.error("Error making call:", error);
+            setStatus('error');
+            setMessage(error instanceof Error ? error.message : 'Failed to initiate call');
         }
 
-        // Reset status after 5 seconds
-        setTimeout(() => {
-            if (status !== 'calling') setStatus('idle');
-        }, 5000);
+        setTimeout(() => setStatus('idle'), 5000);
     };
 
     return (

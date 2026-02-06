@@ -15,11 +15,22 @@ export const IvrDemoPage: React.FC = () => {
     const handlePhoneCall = async () => {
         setPhoneStatus('calling');
 
-        // Trigger the flow towards the browser (Softphone logic)
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseKey) {
+            console.error('Missing Supabase configuration');
+            setPhoneStatus('idle');
+            return;
+        }
+
         try {
-            const res = await fetch('/api/test-ivr-flow', {
+            const res = await fetch(`${supabaseUrl}/functions/v1/test-ivr-flow`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${supabaseKey}`
+                },
                 body: JSON.stringify({
                     to: 'client:user_browser',
                     flowType: selectedFlow
@@ -27,19 +38,15 @@ export const IvrDemoPage: React.FC = () => {
             });
 
             if (!res.ok) {
-                // If API fails (e.g. 404/500), throw to catch block for fallback
                 throw new Error(`API Error: ${res.status}`);
             }
 
-            // Only attempt to parse JSON if we know response is okay
             await res.json();
-
             setTimeout(() => setPhoneStatus('connected'), 2000);
 
         } catch (e) {
-            console.warn("Backend API not reachable or returned error. Falling back to Simulation Mode.", e);
-            // Fallback: Simulate a connected call for Demo purposes on Bolt/Preview environments
-            setTimeout(() => setPhoneStatus('connected'), 1500);
+            console.error("Error triggering IVR flow:", e);
+            setPhoneStatus('idle');
         }
     };
 

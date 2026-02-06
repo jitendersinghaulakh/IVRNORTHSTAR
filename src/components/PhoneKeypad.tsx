@@ -12,7 +12,6 @@ interface PhoneKeypadProps {
 export const PhoneKeypad: React.FC<PhoneKeypadProps> = ({ onCall, status, scenario = 'kba' }) => {
     const [digits, setDigits] = useState('');
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
-    const voiceRef = React.useRef<HTMLAudioElement | null>(null);
 
     // Effect for Ringback Tone
     React.useEffect(() => {
@@ -56,15 +55,9 @@ export const PhoneKeypad: React.FC<PhoneKeypadProps> = ({ onCall, status, scenar
 
             // NOTE: In a real app, this would stream from Twilio. Here we simulate the "Hearing" part for the Bolt demo.
 
-            let audioUrl = '';
-
-            // Simple switch to pick different 'simulated' prompts
-            // Using generic placeholders or public domain speech samples for the demo effect
+            // Simple switch to pick different 'simulated' prompts using browser's Native Speech Synthesis API
             switch (scenario) {
                 case 'kba':
-                    // "Welcome... please enter ID"
-                    audioUrl = 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav'; // Placeholder: Using a known short clip or synthesize one? 
-                    // Actually, let's use the browser's Native Speech Synthesis API! It's better for dynamic demo without external files.
                     speakText("Welcome to NorthStar. Please enter your 4 digit Account I.D.");
                     break;
                 case 'pin':

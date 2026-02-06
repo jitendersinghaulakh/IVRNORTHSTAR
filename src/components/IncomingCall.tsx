@@ -20,13 +20,21 @@ export const IncomingCall: React.FC = () => {
 
         const setupDevice = async () => {
             try {
-                // Fetch User Token
-                const response = await fetch('/api/token');
+                const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-                // Check if response is valid JSON
-                const contentType = response.headers.get("content-type");
-                if (!response.ok || !contentType || !contentType.includes("application/json")) {
-                    throw new Error("Invalid Token Response (Backend likely missing)");
+                if (!supabaseUrl || !supabaseKey) {
+                    throw new Error('Missing Supabase configuration');
+                }
+
+                const response = await fetch(`${supabaseUrl}/functions/v1/get-token`, {
+                    headers: {
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to get token from server");
                 }
 
                 const data = await response.json();
